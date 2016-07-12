@@ -1,0 +1,24 @@
+@namespace(
+	uri="Test",
+	prefix="Test")
+package test;
+
+class A {
+	val B[*] b;
+	attr String name;
+}
+
+class B {
+	ref A[1] a;
+	attr String name;
+}
+
+class Y {
+	val Z[*]#y z;
+	attr String name;
+}
+
+class Z {
+	ref Y[1]#z y;
+	attr String name;
+}

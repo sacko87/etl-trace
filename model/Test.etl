@@ -1,0 +1,27 @@
+post {
+  // Store traceability links in custom model
+  var trace : new Trace!Trace;
+  for (t in transTrace.transformations) {
+    var link : new Trace!TraceLink;
+    link.sources.add(t.source);
+    link.targets = t.targets;
+    link.description = "Transformed by " + t.getRule().name;
+    trace.links.add(link);
+  }
+}
+
+rule AtoY
+	transform a: In!A
+	to y: Out!Y {
+	y.name = a.name;
+	y.z ::= a.b;
+}
+
+rule BtoZ
+	transform b: In!B
+	to z: Out!Z {
+	var x = new Out!Y;
+	x.name = b.name;
+	z.name = b.name;
+	z.y ::= b.a;
+}
