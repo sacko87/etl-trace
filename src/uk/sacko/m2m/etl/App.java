@@ -29,11 +29,13 @@ public class App {
 		model.setReadOnLoad(true);
 		model.setStoredOnDisposal(false);
 
+		// configure output model
 		IModel outModel = EmfModelFactory.getInstance().createEmfModel("Out", new File("model/Out.model"),
 				new File("model/Test.ecore"));
 		outModel.setReadOnLoad(false);
 		outModel.setStoredOnDisposal(true);
 
+		// configure trace model
 		IModel traceModel = EmfModelFactory.getInstance().createEmfModel("Trace", new File("model/Trace.model"),
 				new File("model/Trace.ecore"));
 		traceModel.setReadOnLoad(false);
@@ -48,6 +50,7 @@ public class App {
 			traceModel.load();
 
 			// parse and execute our ETL upon the model above
+			// there is no setter for this!
 			module.setContext(new EtlContext() {
 				protected TransformationTrace transformationTrace = new NestedTransformationTrace();
 
@@ -57,19 +60,26 @@ public class App {
 				}
 			});
 
+			// prepare the module...
+			//   add our new strategy
 			module.getContext().setTransformationStrategy(new TransformationStrategy());
+			//   parse the ETL script
 			module.parse(new File("model/Test.etl"));
+			//   add our models
 			module.getContext().getModelRepository().addModel(model);
 			module.getContext().getModelRepository().addModel(outModel);
 			module.getContext().getModelRepository().addModel(traceModel);
+			//   add the orphan capture listener
 			module.getContext().getExecutorFactory().addExecutionListener(new OrphanCaptureListener());
-			module.execute();
+			module.execute(); // run the transformation
 
+			// basic print of transformation trace
+			// i.e. two level, enough for given example.
 			for (Transformation transformation : module.getContext().getTransformationTrace().getTransformations()) {
 				System.out.println("===");
 				System.out.println(transformation);
 				if(NestedTransformation.class.isInstance(transformation)) {
-					System.out.println(NestedTransformation.class.cast(transformation).getTargets());
+					System.out.println(NestedTransformation.class.cast(transformation).getDependencies());
 				}
 				System.out.println("===");
 			}
